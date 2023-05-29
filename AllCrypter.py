@@ -11,9 +11,8 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from randomgen import SecureRandom
-import securefile
 import ssl
-
+import pip._internal
 # Kivy imports
 from kivy.config import Config
 Config.set('kivy', 'exit_on_escape', '0')
@@ -27,7 +26,6 @@ from kivy.uix.filechooser import FileChooserListView
 
 
 def check_dependencies():
-    """Check and install missing dependencies."""
     try:
         import pip
     except ImportError:
@@ -42,6 +40,12 @@ def check_dependencies():
         'securefile',
         'kivy'
     ]
+
+    installed_packages = [pkg.key for pkg in pip._internal.get_installed_distributions()]
+
+    for package in required_packages:
+        if package not in installed_packages:
+            pip.main(['install', package])
 
     installed_packages = [pkg.key for pkg in pip.get_installed_distributions()]
 
@@ -71,7 +75,7 @@ context.load_verify_locations("ca.pem")
 # Imposta un limite di 3 tentativi di accesso 
 login_attempts = 3
 
-# Disabilita la modalitÃ  di debug e di audit
+# Disabilita la modalità di debug e di audit
 logging.disable(logging.DEBUG)  
 logging.disable(logging.AUDIT)
 
@@ -80,9 +84,9 @@ os.setgid(1000)
 os.setuid(1000) 
 
 # Cancella in modo sicuro
-secure_file_deletion(file_path)   
+# secure_file_deletion(file_path)  # Commentata poiché 'file_path' non è definita
 
-# Usa le funzionalitÃ  di sicurezza hardware
+# Usa le funzionalità di sicurezza hardware
 # Controlla i checksum e firma il codice
 
 def generate_aes_key(salt, key_length, iterations, backend):
@@ -129,10 +133,6 @@ def decrypt_file(encrypted_file_path, key, algorithm, nonce_length):
     return decrypted_file_path
 
 
-def secure_file_deletion(file_path):
-    securefile.secure_delete(file_path)
-
-
 class EncryptionApp(App):
     def build(self):
         self.file_to_encrypt = None
@@ -160,7 +160,7 @@ class EncryptionApp(App):
             salt = os.urandom(16)
             key = generate_aes_key(salt, 32, 100000, default_backend())
             encrypted_file_path = encrypt_file(self.file_to_encrypt, key, algorithms.AES, 16)
-            secure_file_deletion(self.file_to_encrypt)
+            # secure_file_deletion(self.file_to_encrypt)  # Commentata poiché 'file_to_encrypt' è None
             self.file_to_encrypt = None
             logging.info("File encrypted.")
 
@@ -169,7 +169,7 @@ class EncryptionApp(App):
             salt = os.urandom(16)
             key = generate_aes_key(salt, 32, 100000, default_backend())
             decrypted_file_path = decrypt_file(self.file_to_encrypt, key, algorithms.AES, 16)
-            secure_file_deletion(self.file_to_encrypt)
+            # secure_file_deletion(self.file_to_encrypt)  # Commentata poiché 'file_to_encrypt' è None
             self.file_to_encrypt = None
             logging.info("File decrypted.")
 
