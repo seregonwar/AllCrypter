@@ -13,11 +13,12 @@ Before running the application, make sure you have the following dependencies in
 - [randomgen](https://pypi.org/project/randomgen/)
 - [securefile](https://pypi.org/project/securefile/)
 - [kivy](https://kivy.org/#download)
+- [kivymd]( https://github.com/kivymd/KivyMD)
 
 You can install these dependencies using the following command:
 
 ```shell
-pip install cryptography passlib bcrypt randomgen securefile kivy
+pip install cryptography passlib bcrypt randomgen securefile kivy kivymd
 ```
 
 ## Security Features
