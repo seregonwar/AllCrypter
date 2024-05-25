@@ -15,6 +15,7 @@ from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import Screen
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import hashes, serialization, asymmetric
@@ -311,7 +312,50 @@ def decrypt_group_invite(
     except Exception as e:
         print(f"Errore durante la decifratura dell'invito: {e}")
         return None
+class CreateUserScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.layout = GridLayout(cols=1, padding=10)
 
+        email_input = MDTextField(hint_text="Email")
+        password_input = MDTextField(password=True, hint_text="Password")
+        nome_input = MDTextField(hint_text="Nome")
+        cognome_input = MDTextField(hint_text="Cognome")
+        self.layout.add_widget(email_input)
+        self.layout.add_widget(password_input)
+        self.layout.add_widget(nome_input)
+        self.layout.add_widget(cognome_input)
+
+        submit_button = MDRaisedButton(text="Crea utente", on_release=self.on_submit)
+        self.layout.add_widget(submit_button)
+    def on_submit(self, instance):
+        email_input = self.layout.children[0]
+        password_input = self.layout.children[1]
+        nome_input = self.layout.children[2]
+        cognome_input = self.layout.children[3]
+        email = email_input.text
+        password = password_input.text
+        nome = nome_input.text
+        cognome = cognome_input.text
+        if email and password and nome and cognome:
+            encrypted_data = encrypt_user_data(email, password, nome, cognome)
+            if encrypted_data:
+                try:
+                    with open(USER_DATA_FILE, "wb") as f:
+                        f.write(encrypted_data)
+                    self.show_message("Successo", "Utente creato con successo.")
+                    self.manager.current = "login_screen"  # Passa alla schermata di login
+                except Exception as e:
+                    self.show_message("Errore", f"Errore durante il salvataggio dei dati utente: {e}")
+            else:
+                self.show_message("Errore", "Errore durante la cifratura dei dati utente.")
+        else:
+            self.show_message("Errore", "Per favore, compila tutti i campi.")
+
+    def show_message(self, title: str, message: str):
+        dialog = MDDialog(title=title, text=message)
+        dialog.open()
+        self.add_widget(self.layout)
 class EncryptionApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -327,6 +371,7 @@ class EncryptionApp(MDApp):
         self.current_group = None  # Nome del gruppo corrente
 
     def build(self):
+        self.load_user_data()
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Blue"
         return self.login_screen()
@@ -359,7 +404,7 @@ class EncryptionApp(MDApp):
         nome_input = MDTextField(hint_text="Nome", size_hint_x=None, width=Window.width * 0.8)
         cognome_input = MDTextField(hint_text="Cognome", size_hint_x=None, width=Window.width * 0.8)
         register_button = MDRaisedButton(text="Registrati", on_release=self.register_user, size_hint_x=None, width=Window.width * 0.8)
-        back_button = MDFlatButton(text="Indietro", on_release=lambda x: self.root.current = "login_screen")
+        back_button = MDFlatButton(text="Indietro", on_release=lambda x: self.root.current * "login_screen")
 
         layout.add_widget(email_input)
         layout.add_widget(password_input)
@@ -495,14 +540,14 @@ class EncryptionApp(MDApp):
         dialog.open()
 
     def load_user_data(self):
-        """Carica i dati utente dal file."""
-        if os.path.exists(USER_DATA_FILE):
-            self.open_password_dialog(
-                "Inserisci la password per caricare i dati utente:",
-                self.decrypt_and_load_user_data,
-            )
-        else:
-            self.create_new_user()
+      """Carica i dati utente dal file."""
+      if os.path.exists(USER_DATA_FILE):
+        self.open_password_dialog(
+            "Inserisci la password per caricare i dati utente:",
+            self.decrypt_and_load_user_data,
+        )
+      else:
+        self.create_new_user()
 
     def decrypt_and_load_user_data(self):
         if self.password:
@@ -527,6 +572,7 @@ class EncryptionApp(MDApp):
             self.show_message("Errore", "Password not provided.")
 
     def create_new_user(self, instance=None):
+        
         """Crea un nuovo utente."""
         layout = GridLayout(cols=1, padding=10)
 
@@ -549,14 +595,14 @@ class EncryptionApp(MDApp):
                     email, password, nome, cognome
                 )
                 if encrypted_data:
-                    try:
-                        with open(USER_DATA_FILE, "wb") as f:
-                            f.write(encrypted_data)
-                        self.show_message("Successo", "Utente creato con successo.")
-                        self.dialog.dismiss()
-                        self.load_user_data()  # Carica i dati utente dopo la creazione
-                    except Exception as e:
-                        self.show_message(
+                   try:
+                      with open(USER_DATA_FILE, "wb") as f:
+                       f.write(encrypted_data)
+                      self.show_message("Successo", "Utente creato con successo.")
+                      self.dialog.dismiss()
+                      self.decrypt_and_load_user_data()
+                   except Exception as e:
+                      self.show_message(
                             "Errore",
                             f"Errore durante il salvataggio dei dati utente: {e}",
                         )
