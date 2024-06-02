@@ -1,4 +1,7 @@
 # AllCrypter
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=seregonwar&repo=AllCripter&theme=dark)](https://github.com/seregonwar/AllCripter)
+
+
 # Encryption App
 
 The Encryption App is a secure file encryption and decryption application that utilizes the AES algorithm. It provides a user-friendly interface for encrypting and decrypting files, ensuring the confidentiality and integrity of sensitive data.
