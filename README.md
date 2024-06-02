@@ -1,5 +1,5 @@
 # AllCrypter
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=seregonwar&repo=AllCripter&theme=dark)](https://github.com/seregonwar/AllCripter)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=seregonwar&repo=AllCrypter&theme=dark)](https://github.com/seregonwar/AllCrypter)
 
 
 # Encryption App
